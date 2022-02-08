@@ -16,15 +16,28 @@ class Trie:
 
     def auto_complete(self, key, result):
         pCrawl = self
+        prefix = []
         for char in key:
-            # no string with prefix as key
-            if not pCrawl.childrens.get(char): return
-            pCrawl = pCrawl.childrens.get(char)
+            # string with char lowercase
+            if pCrawl.childrens.get(char.upper()):
+                char = char.upper()
+                pCrawl = pCrawl.childrens.get(char)
+                prefix.append(char)
+            # string with char uppercase
+            elif pCrawl.childrens.get(char.lower()):
+                char = char.lower()
+                pCrawl = pCrawl.childrens.get(char)
+                prefix.append(char)
+
+            # no strings with the key as prefix
+            else:
+                return
         # no other string with prefix as key
         if not pCrawl.childrens:
-            result.append(key)
+            result.append(''.join(prefix))
             return
-        self.__auto_comp_helper(pCrawl, key, result)
+
+        self.__auto_comp_helper(pCrawl, ''.join(prefix), result)
 
     # result is array of results after auto_completion
     def __auto_comp_helper(self, trie_node, string, result):
@@ -91,7 +104,7 @@ my_list.pack(pady=40)
 
 # Create a list of pizza toppings
 toppings = ["Pepperoni", "Peppers", "Mushrooms",
-            "Cheese", "Onions", "Ham", "Taco"]
+            "Cheese", "Onions", "Taco", "Broccoli"]
 
 # Add items to trie
 trie_node = Trie()
