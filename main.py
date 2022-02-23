@@ -14,38 +14,35 @@ class Trie:
             p_crawl = p_crawl.childrens[char]
         p_crawl.is_end = True
 
-    def auto_complete(self, key, result):
-        pCrawl = self
-        prefix = []
-        for char in key:
-            # string with char lowercase
-            if pCrawl.childrens.get(char.upper()):
-                char = char.upper()
-                pCrawl = pCrawl.childrens.get(char)
-                prefix.append(char)
-            # string with char uppercase
-            elif pCrawl.childrens.get(char.lower()):
-                char = char.lower()
-                pCrawl = pCrawl.childrens.get(char)
-                prefix.append(char)
-
-            # no strings with the key as prefix
-            else:
+    def auto_complete(self, key, result, pCrawl, prefix="", ind=0):
+        key_len = len(key)
+        # Search for prefix is completed
+        if ind == key_len:
+            # no other string with prefix as key
+            if not pCrawl.childrens:
+                result.append(prefix)
                 return
-        # no other string with prefix as key
-        if not pCrawl.childrens:
-            result.append(''.join(prefix))
+            self.traverse(pCrawl, prefix, result)
             return
+        char = key[ind]
+        # string with char lowercase
+        tempPCrawl = pCrawl.childrens.get(char.upper())
+        if tempPCrawl:
+            self.auto_complete(key, result, tempPCrawl, prefix + char.upper(), ind+1)
 
-        self.__auto_comp_helper(pCrawl, ''.join(prefix), result)
+        # string with char uppercase
+        tempPCrawl = pCrawl.childrens.get(char.lower())
+        if tempPCrawl:
+            self.auto_complete(key, result, tempPCrawl, prefix + char.lower(), ind+1)
 
-    # result is array of results after auto_completion
-    def __auto_comp_helper(self, trie_node, string, result):
+    # It is a function for traversing the Trie and printing all words.
+    # we use this function as a helper of auto_complete
+    def traverse(self, trie_node, string, result):
         if trie_node.is_end:
             result.append(string)
         for key in trie_node.childrens:
-            # calling fucntion recursively
-            self.__auto_comp_helper(trie_node.childrens[key], string + key, result)
+            # calling function recursively
+            self.traverse(trie_node.childrens[key], string + key, result)
 
 
 root = Tk()
@@ -82,7 +79,8 @@ def check(e):
         data = toppings
     else:
         data = []
-        trie_node.auto_complete(typed, data)
+        # third arguement is pCrawl
+        trie_node.auto_complete(typed, data, trie_node)
 
     # update our listbox with selected items
     update(data)
@@ -104,7 +102,7 @@ my_list.pack(pady=40)
 
 # Create a list of pizza toppings
 toppings = ["Pepperoni", "Peppers", "Mushrooms",
-            "Cheese", "Onions", "Taco", "Broccoli"]
+            "Cheese", "Onions", "Taco", "Broccoli", "popcorn"]
 
 # Add items to trie
 trie_node = Trie()
